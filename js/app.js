@@ -55,6 +55,7 @@ moduleCalculator.create('divi', {
     version: '1.0'
 });
 
+//Área de proceso
 //Agregando comportamiento a los módulos
 moduleCalculator.append('suma', {
     sumValues: function(val1 ,val2) {
@@ -77,9 +78,10 @@ moduleCalculator.append('divi', {
     },
 });
 
-//Área de procesos
-debugger;
-  initComponents();
+//Inicializando componentes GUI
+initComponents();
+
+
 //Área de funciones
 function initComponents(){
   //Init numbers
@@ -96,34 +98,35 @@ function setEvents(abuttoms){
 };
 
 function actionKey(event){
-  debugger;
   zoomIn(event);
 
+  debugger;
   if (validateNumber(event.currentTarget.alt)){
-    display.innerHTML =  event.currentTarget.alt;
-  }
+    if (display.innerHTML != "0") {
+      display.innerHTML +=  event.currentTarget.alt;
+    } else {
+        display.innerHTML =  event.currentTarget.alt;
+    }
+  }  
 };
 
 function zoomIn(event){
-  debugger;
   var id = event.currentTarget.attributes.id.value;
   document.getElementById(id).style="width:76.8667px;height:61.9167px;";
 };
 
 function zoomOut(event){
-  debugger;
   var id = event.currentTarget.attributes.id.value;
   document.getElementById(id).style="width:77.8667px;height:62.9167px;";
 };
 
 function validateNumber(anumber){
   var asciiCode = anumber.charCodeAt(0);
-  if (asciiCode >= 49 && asciiCode <=57){
+  if (asciiCode >= 48 && asciiCode <=57){
     return true;
   }
   return false;
 }
-
 
   /*btnTwo = document.getElementById('2');
   btnThree = document.getElementById('3');
