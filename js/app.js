@@ -1,6 +1,9 @@
 //declaración de variables
 var buttoms = [];
 var display;
+var value1, value2;
+var tempValue;
+var operation;
 
 //Contenedor de módulos, contiene la lógica necesaria para hacer las veces
 // de una fábrica y módulos.
@@ -80,14 +83,20 @@ moduleCalculator.append('divi', {
 
 //Inicializando componentes GUI
 initComponents();
-
+initValues();
 
 //Área de funciones
+function initValues(){
+  value1 = 0;
+  value2 = 0;
+  tempValue = "";
+  display.innerHTML="0";
+}
 function initComponents(){
   //Init numbers
   buttoms = document.getElementsByClassName('tecla');
-  setEvents(buttoms);
   display = document.getElementById('display');
+  setEvents(buttoms);
 };
 
 function setEvents(abuttoms){
@@ -100,24 +109,70 @@ function setEvents(abuttoms){
 function actionKey(event){
   zoomIn(event);
 
-  debugger;
+  //debugger;
   if (validateNumber(event.currentTarget.alt)){
     if (display.innerHTML != "0") {
       display.innerHTML +=  event.currentTarget.alt;
-    } else {
-        display.innerHTML =  event.currentTarget.alt;
+    } else if (value2 === 0) {
+      display.innerHTML =  event.currentTarget.alt;
     }
-  }  
+
+    if (display.innerHTML != "0") {
+      tempValue +=  event.currentTarget.alt;
+    }
+  }
+  switch (event.currentTarget.alt) {
+    case "on":
+      initValues();
+      break;
+    case "sign":
+
+      break;
+    case  "mas":
+      setValues(event);
+      break;
+    case  "menos":
+      setValues(event);
+      break;
+    case  "por":
+      setValues(event);
+        break;
+    case  "divido":
+      setValues(event);
+      break;
+
+    case "punto":
+
+        break;
+    case "igual":
+        setOperation();
+        break;
+  }
 };
+
+function setValues(event){
+  assignVariablesValues();
+  operation = event.currentTarget.alt;
+  initBuffer();
+}
+
+function initBuffer() {
+  tempValue = "";
+  display.innerHTML =  "";
+}
 
 function zoomIn(event){
   var id = event.currentTarget.attributes.id.value;
-  document.getElementById(id).style="width:76.8667px;height:61.9167px;";
+  if (id != "mas") {
+    document.getElementById(id).style="width:76.8667px;height:61.9167px;";
+  }
 };
 
 function zoomOut(event){
   var id = event.currentTarget.attributes.id.value;
-  document.getElementById(id).style="width:77.8667px;height:62.9167px;";
+  if (id != "mas"){
+    document.getElementById(id).style="width:77.8667px;height:62.9167px;";
+  }
 };
 
 function validateNumber(anumber){
@@ -128,29 +183,42 @@ function validateNumber(anumber){
   return false;
 }
 
-  /*btnTwo = document.getElementById('2');
-  btnThree = document.getElementById('3');
-  btnFour = document.getElementById('4');
-  btnFive = document.getElementById('5');
-  btnSix =document.getElementById('6');
-  btnSeven = document.getElementById('7');
-  btnEight = document.getElementById('8');
-  btnNine = document.getElementById('9');
-  btnCero = document.getElementById('0');*/
+function setOperation(){
+  assignVariablesValues()
+  switch (operation) {
+    case "mas":
+      var suma= moduleCalculator.get('suma');
+      value1 = suma.sumValues(value1, value2);
+      changeValuesForNewOperation()
+      break;
+    case "menos":
+      var resta= moduleCalculator.get('resta');
+      value1 = resta.subsValues(value1, value2);
+      changeValuesForNewOperation()
+      break;
+    case "por":
+      var mult= moduleCalculator.get('mult');
+      value1 = mult.multValues(value1, value2);
+      changeValuesForNewOperation()
+      break;
+    case "dividido":
+      var divi= moduleCalculator.get('divi');
+      value1 = divi.divValues(value1, value2);
+      changeValuesForNewOperation()
+      break;
+    }
+}
 
-  //Init Operations
+function changeValuesForNewOperation(){
+  value2 = 0;
+  display.innerHTML = value1;
+  tempValue = "";
+}
 
-function usoMetodos(){
-
-  var suma= moduleCalculator.get('suma');
-  console.log(suma.sumValues(2,4));
-
-  var resta= moduleCalculator.get('resta');
-  console.log(resta.subsValues(2,4));
-
-  var mult= moduleCalculator.get('mult');
-  console.log(mult.multValues(2,4));
-
-  var divi= moduleCalculator.get('divi');
-  console.log(divi.divValues(2,4));
+function assignVariablesValues(){
+  if (value1 == 0) {
+    value1 = Number(tempValue);
+  } else if (value2 == 0) {
+    value2 = Number(tempValue);
+  }
 }
