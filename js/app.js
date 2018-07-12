@@ -89,8 +89,10 @@ initValues();
 function initValues(){
   value1 = 0;
   value2 = 0;
+  countDigits = 0;
   tempValue = "";
-  display.innerHTML="0";
+  setDisplay("0", "sobreescribir");
+  //display.innerHTML="0";
 }
 function initComponents(){
   //Init numbers
@@ -109,24 +111,29 @@ function setEvents(abuttoms){
 function actionKey(event){
   zoomIn(event);
 
-  //debugger;
   if (validateNumber(event.currentTarget.alt)){
     if (display.innerHTML != "0") {
-      display.innerHTML +=  event.currentTarget.alt;
+      setDisplay(event.currentTarget.alt, "concatenar");
+      //display.innerHTML +=  event.currentTarget.alt;
     } else if (value2 === 0) {
-      display.innerHTML =  event.currentTarget.alt;
+      setDisplay(event.currentTarget.alt, "sobreescribir");
+      //display.innerHTML =  event.currentTarget.alt;
     }
 
     if (display.innerHTML != "0") {
       tempValue +=  event.currentTarget.alt;
     }
   }
+  //debugger;
   switch (event.currentTarget.alt) {
-    case "on":
+    case "On":
       initValues();
       break;
-    case "sign":
-
+    case "signo":
+        if (display.innerHTML != "0") {
+          setDisplay((controlSigns(display.innerHTML, event.currentTarget.alt)),"sobreescribir");
+          //display.innerHTML = controlSigns(display.innerHTML, event.currentTarget.alt);
+        }
       break;
     case  "mas":
       setValues(event);
@@ -137,12 +144,12 @@ function actionKey(event){
     case  "por":
       setValues(event);
         break;
-    case  "divido":
+    case  "dividido":
       setValues(event);
       break;
-
     case "punto":
-
+        setDisplay((controlSigns(display.innerHTML, event.currentTarget.alt)),"sobreescribir");
+        //display.innerHTML = controlSigns(display.innerHTML, event.currentTarget.alt);
         break;
     case "igual":
         setOperation();
@@ -158,7 +165,8 @@ function setValues(event){
 
 function initBuffer() {
   tempValue = "";
-  display.innerHTML =  "";
+  setDisplay("","sobreescribir");
+  //display.innerHTML =  "";
 }
 
 function zoomIn(event){
@@ -211,14 +219,65 @@ function setOperation(){
 
 function changeValuesForNewOperation(){
   value2 = 0;
-  display.innerHTML = value1;
+  setDisplay(value1.toString(),"sobreescribir");
+  //display.innerHTML = value1;
   tempValue = "";
 }
 
 function assignVariablesValues(){
-  if (value1 == 0) {
+  if (value1 == 0 && value2 == 0) {
     value1 = Number(tempValue);
-  } else if (value2 == 0) {
+  } else {
     value2 = Number(tempValue);
+  }
+}
+
+function controlSigns(stringOcc, charOcc){
+  var newstringOcc = stringOcc;
+
+  switch (charOcc) {
+    case "punto":
+      charOcc = ".";
+      break;
+    case "signo":
+      charOcc = "-";
+      break;
+  }
+  if (newstringOcc.indexOf(charOcc) != -1 ) {
+    if (charOcc === "-") {
+      newstringOcc = newstringOcc.substring(1, (newstringOcc.length));
+      tempValue = newstringOcc;
+      value1 = Number(tempValue);
+    }
+  }
+  else{
+    if (charOcc === "."){
+      newstringOcc = newstringOcc + charOcc;
+      tempValue = newstringOcc;
+    }else if (charOcc === "-") {
+      newstringOcc = charOcc + newstringOcc;
+      tempValue = newstringOcc;
+      value1 = Number(tempValue);
+    }
+  }
+  return(newstringOcc);
+}
+
+function setDisplay(avalue, modo){
+  switch (modo) {
+    case "sobreescribir":
+      if (avalue.length > 8){
+        display.innerHTML = avalue.substring(0,8);
+      } else {
+        display.innerHTML = avalue;
+      }
+      break;
+    case "concatenar":
+      if (tempValue.length <= 8){
+        display.innerHTML += avalue;
+      } else {
+        display.innerHTML = tempValue.substring(0,8);
+      }
+      break;
   }
 }
