@@ -3,8 +3,8 @@ var buttoms = [];
 var display;
 var value1, value2;
 var tempValue;
-var operation;
-
+var operation1 = "";
+var operation2 = "";
 //Contenedor de módulos, contiene la lógica necesaria para hacer las veces
 // de una fábrica y módulos.
 var moduleCalculator = (function(){
@@ -89,6 +89,8 @@ initValues();
 function initValues(){
   value1 = 0;
   value2 = 0;
+  operation1 = "";
+  operation2 = "";
   countDigits = 0;
   tempValue = "";
   setDisplay("0", "sobreescribir");
@@ -112,7 +114,9 @@ function actionKey(event){
   zoomIn(event);
 
   if (validateNumber(event.currentTarget.alt)){
-    if (display.innerHTML != "0") {
+    /*if (display.innerHTML != "0" && value1==0 && value2==0 && operation1.length==0 &&
+        operation2.length==0) {*/
+    if (display.innerHTML != "0" && tempValue.length > 0) {
       setDisplay(event.currentTarget.alt, "concatenar");
       //display.innerHTML +=  event.currentTarget.alt;
     } else if (value2 === 0) {
@@ -137,15 +141,27 @@ function actionKey(event){
       break;
     case  "mas":
       setValues(event);
+        if (pendingOperation()) {
+          setOperation();
+        }
       break;
     case  "menos":
       setValues(event);
+      if (pendingOperation()) {
+        setOperation();
+      }
       break;
     case  "por":
       setValues(event);
+      if (pendingOperation()) {
+        setOperation();
+      }
         break;
     case  "dividido":
       setValues(event);
+      if (pendingOperation()) {
+        setOperation();
+      }
       break;
     case "punto":
         setDisplay((controlSigns(display.innerHTML, event.currentTarget.alt)),"sobreescribir");
@@ -159,7 +175,11 @@ function actionKey(event){
 
 function setValues(event){
   assignVariablesValues();
-  operation = event.currentTarget.alt;
+  if (operation1.length === 0 && operation2.length === 0){
+    operation1 = event.currentTarget.alt;
+  }else {
+    operation2 = event.currentTarget.alt;
+  }
   initBuffer();
 }
 
@@ -193,7 +213,7 @@ function validateNumber(anumber){
 
 function setOperation(){
   assignVariablesValues()
-  switch (operation) {
+  switch (operation1) {
     case "mas":
       var suma= moduleCalculator.get('suma');
       value1 = suma.sumValues(value1, value2);
@@ -219,16 +239,25 @@ function setOperation(){
 
 function changeValuesForNewOperation(){
   value2 = 0;
+  if (operation1.length > 0 && operation2.length > 0) {
+    operation1 = operation2;
+    operation2 = "";
+  } else {
+    operation1 = "";
+    operation2 = "";
+  }
   setDisplay(value1.toString(),"sobreescribir");
   //display.innerHTML = value1;
   tempValue = "";
 }
 
 function assignVariablesValues(){
-  if (value1 == 0 && value2 == 0) {
-    value1 = Number(tempValue);
-  } else {
-    value2 = Number(tempValue);
+  if (!(pendingOperation())) {
+    if (value1 == 0 && value2 == 0) {
+      value1 = Number(tempValue);
+    } else {
+      value2 = Number(tempValue);
+    }
   }
 }
 
@@ -247,7 +276,8 @@ function controlSigns(stringOcc, charOcc){
     if (charOcc === "-") {
       newstringOcc = newstringOcc.substring(1, (newstringOcc.length));
       tempValue = newstringOcc;
-      value1 = Number(tempValue);
+      //value1 = Number(tempValue);
+      value1 = 0;
     }
   }
   else{
@@ -257,7 +287,8 @@ function controlSigns(stringOcc, charOcc){
     }else if (charOcc === "-") {
       newstringOcc = charOcc + newstringOcc;
       tempValue = newstringOcc;
-      value1 = Number(tempValue);
+      //value1 = Number(tempValue);
+      value1 = 0;
     }
   }
   return(newstringOcc);
@@ -280,4 +311,10 @@ function setDisplay(avalue, modo){
       }
       break;
   }
+}
+function pendingOperation(){
+  if (value1 != 0 && value2 != 0){
+    return true
+  }
+  return false;
 }
