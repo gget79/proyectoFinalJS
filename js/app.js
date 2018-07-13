@@ -1,320 +1,248 @@
-//declaración de variables
-var buttoms = [];
-var display;
-var value1, value2;
-var tempValue;
-var operation1 = "";
-var operation2 = "";
-//Contenedor de módulos, contiene la lógica necesaria para hacer las veces
-// de una fábrica y módulos.
-var moduleCalculator = (function(){
-    var modules = {};
-    return {
-        create: function(name, desc) {
-            if(modules[name] === undefined) {
-                modules[name] = {};
-            }
-            modules[name].desc = function(){
-                return desc;
-            }
-        },
-        append: function(name, module) {
-            if(modules[name] === undefined) {
-                throw 'Módulo no existe';
-            }
+//Declaración del NameSpace
+var moduleCalculator = {};
 
-            for(var k in module) {
-                modules[name][k] = module[k];
-            }
-        },
-        get: function(name) {
-            if(modules[name] === undefined) {
-                throw 'Módulo no existe';
-            }
-            return modules[name];
-        }
-    }
-})();
+//Implementación del módulo
+moduleCalculator = (function(){
+  //declaración de variables globales al modulo
+  var buttoms = [];
+  var display;
+  var value1, value2;
+  var tempValue;
+  var operation1 = "";
+  var operation2 = "";
+  var $this = this; //variable que contextualizará el objeto en ejecución
 
-//Registro de los módulos
-moduleCalculator.create('suma', {
-    name: 'suma',
-    description: 'Módulo que contiene la funcionalidad para sumar valores',
-    version: '1.0'
-});
-moduleCalculator.create('resta', {
-    name: 'resta',
-    description: 'Módulo que contiene la funcionalidad para restar valores',
-    version: '1.0'
-});
-moduleCalculator.create('mult', {
-    name: 'multiplicación',
-    description: 'Módulo que contiene la funcionalidad para multiplicación valores',
-    version: '1.0'
-});
-moduleCalculator.create('divi', {
-    name: 'división',
-    description: 'Módulo que contiene la funcionalidad para división valores',
-    version: '1.0'
-});
-
-//Área de proceso
-//Agregando comportamiento a los módulos
-moduleCalculator.append('suma', {
-    sumValues: function(val1 ,val2) {
-        return val1 + val2;
-    },
-});
-moduleCalculator.append('resta', {
-    subsValues: function(val1 ,val2) {
-        return val1 - val2;
-    },
-});
-moduleCalculator.append('mult', {
-    multValues: function(val1 ,val2) {
-        return val1 * val2;
-    },
-});
-moduleCalculator.append('divi', {
-    divValues: function(val1 ,val2) {
-        return val1 / val2;
-    },
-});
-
-//Inicializando componentes GUI
-initComponents();
-initValues();
-
-//Área de funciones
-function initValues(){
-  value1 = 0;
-  value2 = 0;
-  operation1 = "";
-  operation2 = "";
-  countDigits = 0;
-  tempValue = "";
-  setDisplay("0", "sobreescribir");
-  //display.innerHTML="0";
-}
-function initComponents(){
-  //Init numbers
-  buttoms = document.getElementsByClassName('tecla');
-  display = document.getElementById('display');
-  setEvents(buttoms);
-};
-
-function setEvents(abuttoms){
-  for (var i in abuttoms) {
-    abuttoms[i].onclick = actionKey;
-    abuttoms[i].onmouseout = zoomOut;
+  //Métodos privados
+  function sumValues(val1 ,val2) {
+      return val1 + val2;
   }
-};
-
-function actionKey(event){
-  zoomIn(event);
-
-  if (validateNumber(event.currentTarget.alt)){
-    /*if (display.innerHTML != "0" && value1==0 && value2==0 && operation1.length==0 &&
-        operation2.length==0) {*/
-    if (display.innerHTML != "0" && tempValue.length > 0) {
-      setDisplay(event.currentTarget.alt, "concatenar");
-      //display.innerHTML +=  event.currentTarget.alt;
-    } else if (value2 === 0) {
-      setDisplay(event.currentTarget.alt, "sobreescribir");
-      //display.innerHTML =  event.currentTarget.alt;
+  function subsValues(val1 ,val2) {
+      return val1 - val2;
+  }
+  function multValues(val1 ,val2) {
+      return val1 * val2;
+  }
+  function divValues(val1 ,val2) {
+    try{
+      var resultado = val1 / val2;
+    } catch (err) {
+      alert("Existe un error" + " - " + err.message);
     }
-
-    if (display.innerHTML != "0") {
-      tempValue +=  event.currentTarget.alt;
+      return resultado;
+  }
+  function initValues(){
+    $this.value1 = 0;
+    $this.value2 = 0;
+    $this.operation1 = "";
+    $this.operation2 = "";
+    $this.countDigits = 0;
+    $this.tempValue = "";
+    setDisplay("0", "sobreescribir");
+  }
+  function setDisplay(avalue, modo){
+    switch (modo) {
+      case "sobreescribir":
+        if (avalue.length > 8){
+          $this.display.innerHTML = avalue.substring(0,8);
+        } else {
+          $this.display.innerHTML = avalue;
+        }
+        break;
+      case "concatenar":
+        if ($this.tempValue.length <= 8){
+          $this.display.innerHTML += avalue;
+        } else {
+          $this.display.innerHTML = $this.tempValue.substring(0,8);
+        }
+        break;
     }
   }
-  //debugger;
-  switch (event.currentTarget.alt) {
-    case "On":
-      initValues();
-      break;
-    case "signo":
-        if (display.innerHTML != "0") {
-          setDisplay((controlSigns(display.innerHTML, event.currentTarget.alt)),"sobreescribir");
-          //display.innerHTML = controlSigns(display.innerHTML, event.currentTarget.alt);
-        }
-      break;
-    case  "mas":
-      setValues(event);
+  function initComponents(){
+    $this.buttoms = document.getElementsByClassName('tecla');
+    $this.display = document.getElementById('display');
+    setEvents($this.buttoms);
+    initValues();
+  }
+  function setEvents(abuttoms){
+    for (var i in abuttoms) {
+      abuttoms[i].onclick = actionKey;
+      abuttoms[i].onmouseout = zoomOut;
+    }
+  }
+  function actionKey(event){
+    zoomIn(event);
+
+    if (validateNumber(event.currentTarget.alt)){
+      if ($this.display.innerHTML != "0" && $this.tempValue.length > 0) {
+        setDisplay(event.currentTarget.alt, "concatenar");
+      } else if ($this.value2 === 0) {
+        setDisplay(event.currentTarget.alt, "sobreescribir");
+      }
+
+      if ($this.display.innerHTML != "0") {
+        $this.tempValue +=  event.currentTarget.alt;
+      }
+    }
+    switch (event.currentTarget.alt) {
+      case "On":
+        initValues();
+        break;
+      case "signo":
+          if ($this.display.innerHTML != "0") {
+            setDisplay((controlSigns($this.display.innerHTML, event.currentTarget.alt)),"sobreescribir");
+          }
+        break;
+      case  "mas":
+        setValues(event);
+          if (pendingOperation()) {
+            setOperation();
+          }
+        break;
+      case  "menos":
+        setValues(event);
         if (pendingOperation()) {
           setOperation();
         }
-      break;
-    case  "menos":
-      setValues(event);
-      if (pendingOperation()) {
-        setOperation();
-      }
-      break;
-    case  "por":
-      setValues(event);
-      if (pendingOperation()) {
-        setOperation();
-      }
         break;
-    case  "dividido":
-      setValues(event);
-      if (pendingOperation()) {
-        setOperation();
-      }
-      break;
-    case "punto":
-        setDisplay((controlSigns(display.innerHTML, event.currentTarget.alt)),"sobreescribir");
-        //display.innerHTML = controlSigns(display.innerHTML, event.currentTarget.alt);
+      case  "por":
+        setValues(event);
+        if (pendingOperation()) {
+          setOperation();
+        }
+          break;
+      case  "dividido":
+        setValues(event);
+        if (pendingOperation()) {
+          setOperation();
+        }
         break;
-    case "igual":
-        setOperation();
-        break;
-  }
-};
-
-function setValues(event){
-  assignVariablesValues();
-  if (operation1.length === 0 && operation2.length === 0){
-    operation1 = event.currentTarget.alt;
-  }else {
-    operation2 = event.currentTarget.alt;
-  }
-  initBuffer();
-}
-
-function initBuffer() {
-  tempValue = "";
-  setDisplay("","sobreescribir");
-  //display.innerHTML =  "";
-}
-
-function zoomIn(event){
-  var id = event.currentTarget.attributes.id.value;
-  if (id != "mas") {
-    document.getElementById(id).style="width:76.8667px;height:61.9167px;";
-  }
-};
-
-function zoomOut(event){
-  var id = event.currentTarget.attributes.id.value;
-  if (id != "mas"){
-    document.getElementById(id).style="width:77.8667px;height:62.9167px;";
-  }
-};
-
-function validateNumber(anumber){
-  var asciiCode = anumber.charCodeAt(0);
-  if (asciiCode >= 48 && asciiCode <=57){
-    return true;
-  }
-  return false;
-}
-
-function setOperation(){
-  assignVariablesValues()
-  switch (operation1) {
-    case "mas":
-      var suma= moduleCalculator.get('suma');
-      value1 = suma.sumValues(value1, value2);
-      changeValuesForNewOperation()
-      break;
-    case "menos":
-      var resta= moduleCalculator.get('resta');
-      value1 = resta.subsValues(value1, value2);
-      changeValuesForNewOperation()
-      break;
-    case "por":
-      var mult= moduleCalculator.get('mult');
-      value1 = mult.multValues(value1, value2);
-      changeValuesForNewOperation()
-      break;
-    case "dividido":
-      var divi= moduleCalculator.get('divi');
-      value1 = divi.divValues(value1, value2);
-      changeValuesForNewOperation()
-      break;
+      case "punto":
+          setDisplay((controlSigns($this.display.innerHTML, event.currentTarget.alt)),"sobreescribir");
+          break;
+      case "igual":
+          setOperation();
+          break;
+      case "raiz":
+          alert('Función no implementada en esta iteración');
+          break;
     }
-}
-
-function changeValuesForNewOperation(){
-  value2 = 0;
-  if (operation1.length > 0 && operation2.length > 0) {
-    operation1 = operation2;
-    operation2 = "";
-  } else {
-    operation1 = "";
-    operation2 = "";
   }
-  setDisplay(value1.toString(),"sobreescribir");
-  //display.innerHTML = value1;
-  tempValue = "";
-}
-
-function assignVariablesValues(){
-  if (!(pendingOperation())) {
-    if (value1 == 0 && value2 == 0) {
-      value1 = Number(tempValue);
+  function setValues(event){
+    assignVariablesValues();
+    if ($this.operation1.length === 0 && $this.operation2.length === 0){
+      $this.operation1 = event.currentTarget.alt;
+    }else {
+      $this.operation2 = event.currentTarget.alt;
+    }
+    initBuffer();
+  }
+  function initBuffer() {
+    $this.tempValue = "";
+    setDisplay("","sobreescribir");
+  }
+  function zoomIn(event){
+    var id = event.currentTarget.attributes.id.value;
+    if (id != "mas") {
+      document.getElementById(id).style="width:76.8667px;height:61.9167px;";
+    }
+  }
+  function zoomOut(event){
+    var id = event.currentTarget.attributes.id.value;
+    if (id != "mas"){
+      document.getElementById(id).style="width:77.8667px;height:62.9167px;";
+    }
+  }
+  function validateNumber(anumber){
+    var asciiCode = anumber.charCodeAt(0);
+    if (asciiCode >= 48 && asciiCode <=57){
+      return true;
+    }
+    return false;
+  }
+  function setOperation(){
+    assignVariablesValues()
+    switch ($this.operation1) {
+      case "mas":
+        $this.value1 = sumValues($this.value1, $this.value2);
+        changeValuesForNewOperation()
+        break;
+      case "menos":
+        $this.value1 = subsValues($this.value1, $this.value2);
+        changeValuesForNewOperation()
+        break;
+      case "por":
+        $this.value1 = multValues($this.value1,$this. value2);
+        changeValuesForNewOperation()
+        break;
+      case "dividido":
+        $this.value1 = divValues($this.value1, $this.value2);
+        changeValuesForNewOperation()
+        break;
+      }
+  }
+  function changeValuesForNewOperation(){
+    $this.value2 = 0;
+    if ($this.operation1.length > 0 && $this.operation2.length > 0) {
+      $this.operation1 = $this.operation2;
+      $this.operation2 = "";
     } else {
-      value2 = Number(tempValue);
+      $this.operation1 = "";
+      $this.operation2 = "";
     }
+    setDisplay($this.value1.toString(),"sobreescribir");
+    $this.tempValue = "";
   }
-}
-
-function controlSigns(stringOcc, charOcc){
-  var newstringOcc = stringOcc;
-
-  switch (charOcc) {
-    case "punto":
-      charOcc = ".";
-      break;
-    case "signo":
-      charOcc = "-";
-      break;
-  }
-  if (newstringOcc.indexOf(charOcc) != -1 ) {
-    if (charOcc === "-") {
-      newstringOcc = newstringOcc.substring(1, (newstringOcc.length));
-      tempValue = newstringOcc;
-      //value1 = Number(tempValue);
-      value1 = 0;
-    }
-  }
-  else{
-    if (charOcc === "."){
-      newstringOcc = newstringOcc + charOcc;
-      tempValue = newstringOcc;
-    }else if (charOcc === "-") {
-      newstringOcc = charOcc + newstringOcc;
-      tempValue = newstringOcc;
-      //value1 = Number(tempValue);
-      value1 = 0;
-    }
-  }
-  return(newstringOcc);
-}
-
-function setDisplay(avalue, modo){
-  switch (modo) {
-    case "sobreescribir":
-      if (avalue.length > 8){
-        display.innerHTML = avalue.substring(0,8);
+  function assignVariablesValues(){
+    if (!(pendingOperation())) {
+      if ($this.value1 == 0 && $this.value2 == 0) {
+        $this.value1 = Number($this.tempValue);
       } else {
-        display.innerHTML = avalue;
+        $this.value2 = Number($this.tempValue);
       }
-      break;
-    case "concatenar":
-      if (tempValue.length <= 8){
-        display.innerHTML += avalue;
-      } else {
-        display.innerHTML = tempValue.substring(0,8);
+    }
+  }
+  function controlSigns(stringOcc, charOcc){
+    var newstringOcc = stringOcc;
+
+    switch (charOcc) {
+      case "punto":
+        charOcc = ".";
+        break;
+      case "signo":
+        charOcc = "-";
+        break;
+    }
+    if (newstringOcc.indexOf(charOcc) != -1 ) {
+      if (charOcc === "-") {
+        newstringOcc = newstringOcc.substring(1, (newstringOcc.length));
+        $this.tempValue = newstringOcc;
+        $this.value1 = 0;
       }
-      break;
+    }
+    else{
+      if (charOcc === "."){
+        newstringOcc = newstringOcc + charOcc;
+        $this.tempValue = newstringOcc;
+      }else if (charOcc === "-") {
+        newstringOcc = charOcc + newstringOcc;
+        $this.tempValue = newstringOcc;
+        $this.value1 = 0;
+      }
+    }
+    return(newstringOcc);
   }
-}
-function pendingOperation(){
-  if (value1 != 0 && value2 != 0){
-    return true
+  function pendingOperation(){
+    if ($this.value1 != 0 && $this.value2 != 0){
+      return true
+    }
+    return false;
   }
-  return false;
-}
+
+  //Métodos públicos
+  return {
+    initComponents: initComponents
+  }
+})();
+
+//Área de proceso
+moduleCalculator.initComponents();
